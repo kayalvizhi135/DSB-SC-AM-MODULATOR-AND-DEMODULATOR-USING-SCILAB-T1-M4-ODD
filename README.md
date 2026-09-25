@@ -45,62 +45,106 @@ To write a program to perform DSBSC modulation and demodulation using SCI LAB an
 Plot the message signal, carrier signal, DSBSC modulated signal, and the recovered signal after demodulation.
 
 ---
-## CODE
-clc;
-clear;
-close;
 
-// Time
-t = 0:0.00001:0.01;
+## PROGRAM
+
+Am = 9.2;   
+
+Ac = 18.4;
+
+fm = 515; 
+
+fc = 5150;
+
+fs = 51500; 
+
+T = 0.05;       
+
+// Time vector
+
+t = 0:1/fs:T;
 
 // Message signal
-Am = 1;
-fm = 1000;
-m = Am*sin(2*%pi*fm*t);
+
+m = Am*cos(2*%pi*fm*t);
 
 // Carrier signal
-Ac = 1;
-fc = 10000;
+
 c = Ac*cos(2*%pi*fc*t);
 
-// DSB-SC Modulation
-dsbsc = m .* c;
+// DSB-SC modulation
 
-// Coherent Demodulation
-demod = 2 * dsbsc .* c;
+dsb_sc = m .* c;
 
-// Low Pass Filter
-fc_lp = 2000;
-[b,a] = iir(5,'lp','butt',[fc_lp/(1/(2*0.00001)) 0],[]);
-output = flts(demod,b,a);
+// Coherent demodulation
 
-// Plot Message Signal
+demod = dsb_sc .* c;
+
+// Low-pass filter
+
+fc_lpf = 300;
+
+Wn = 2*%pi*fc_lpf/fs;
+
+// FIR low-pass filter
+
+N = 101;
+
+h = ones(1,N)/N;
+
+// Apply filter
+
+recovered = convol(demod,h);
+
+// Adjust time vector
+
+t_rec = t(1:length(recovered));
+
+// Normalize recovered signal
+
+recovered = recovered / max(abs(recovered));
+
+// Plotting
+
 subplot(4,1,1);
+
 plot(t,m);
+
 xlabel("Time (s)");
+
 ylabel("Amplitude");
+
 title("Message Signal");
 
-// Plot Carrier Signal
 subplot(4,1,2);
+
 plot(t,c);
+
 xlabel("Time (s)");
+
 ylabel("Amplitude");
+
 title("Carrier Signal");
 
-// Plot DSB-SC Signal
 subplot(4,1,3);
-plot(t,dsbsc);
+
+plot(t,dsb_sc);
+
 xlabel("Time (s)");
+
 ylabel("Amplitude");
+
 title("DSB-SC Modulated Signal");
 
-// Plot Demodulated Signal
 subplot(4,1,4);
-plot(t,output);
+
+plot(t_rec,recovered);
+
 xlabel("Time (s)");
+
 ylabel("Amplitude");
-title("Demodulated Signal");
+
+title("Demodulated / Recovered Signal");
 ## PROCEDURE
 
 * Refer Algorithms and write code for the experiment.
